@@ -1,7 +1,7 @@
 ﻿
 ---
 
-# 🎤 Name Origin Audio Generator
+# 🎤 Name Audio Generator
 
 This project is a **C# ASP.NET Core application** that analyzes a given name, detects its possible origin, transliterates it to native script (when applicable), and generates an audio file using ElevenLabs TTS.
 
@@ -85,7 +85,7 @@ The frontend is a single `index.html` file that:
 ```json
 {
   "name": "Nguyen",
-  "voiceId": "m0ym3Tl23iHi7B3lTc2L",
+  "voiceId": "m0ym12345iHi7B3lTc2L",
   "model": "gemini",
   "singlePrompt": false
 }
