@@ -1,0 +1,10 @@
+﻿@phonetics_HostAddress = http://localhost:5110
+
+POST {{phonetics_HostAddress}}/
+Accept: application/json
+Content-Type: application/json
+{
+  "name": "Wang Guanxiong"
+}
+
+###

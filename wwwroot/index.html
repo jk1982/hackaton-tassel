@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>ElevenLabs TTS Test</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #f7f9fc, #e3e8f0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        p#status {
+            margin-top: 15px;
+            color: #333;
+        }
+
+        .info-box {
+            background: #f1f3f5;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        audio {
+            margin-top: 15px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Name Audio Generator</h1>
+
+        <input id="name" type="text" placeholder="Enter your name here..." />
+
+        <label for="voiceSelect">Voice:</label>
+        <select id="voiceSelect">
+            <option value="MMT36IyAWQHYKeo728oe">Amy Johnson</option>
+            <option value="m0ym3Tl23iHi7B3lTc2L">Monica</option>
+        </select>
+
+        <label for="modelSelect">Model:</label>
+        <select id="modelSelect">
+            <option value="chatgpt">ChatGPT</option>
+            <option value="gemini">Gemini</option>
+        </select>
+
+        <label>
+            <input type="checkbox" id="singlePromptCheckbox" />
+            Use only one prompt
+        </label>
+
+        <button onclick="generateAudio()">Generate & Play</button>
+
+        <p id="status"></p>
+
+        <audio id="audioPlayer" controls style="display:none;"></audio>
+
+        <div id="native_script" class="info-box" style="display:none;"></div>
+        <div id="ethnicity" class="info-box" style="display:none;"></div>
+        <div id="confidence" class="info-box" style="display:none;"></div>
+        <div id="alternatives" class="info-box" style="display:none;"></div>
+    </div>
+
+    <script>
+        async function generateAudio() {
+            const name = document.getElementById('name').value.trim();
+            const voiceId = document.getElementById('voiceSelect').value;
+            const model = document.getElementById('modelSelect').value;
+            const singlePrompt = document.getElementById('singlePromptCheckbox').checked;
+
+            const status = document.getElementById('status');
+            const nativeScript = document.getElementById('native_script');
+            const ethnicity = document.getElementById('ethnicity');
+            const confidence = document.getElementById('confidence');
+            const alternatives = document.getElementById('alternatives');
+            const audioPlayer = document.getElementById('audioPlayer');
+
+            // Reset UI
+            nativeScript.style.display = "none";
+            ethnicity.style.display = "none";
+            confidence.style.display = "none";
+            alternatives.style.display = "none";
+            audioPlayer.style.display = "none";
+            status.textContent = "";
+
+            if (!name) {
+                status.textContent = "⚠️ Please enter a name.";
+                return;
+            }
+
+            status.textContent = "⏳ Generating audio...";
+
+            try {
+                const payload = {
+                    name,
+                    voiceId,
+                    model,
+                    singlePrompt
+                };
+
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    status.textContent = "❌ Error generating audio.";
+                    return;
+                }
+
+                const data = await response.json();
+                const audioSrc = `data:audio/mpeg;base64,${data.audio_base64}`;
+
+                audioPlayer.src = audioSrc;
+                audioPlayer.style.display = "block";
+                audioPlayer.play();
+
+                if (data.native_script) {
+                    nativeScript.textContent = `Native Script: ${data.native_script}`;
+                    nativeScript.style.display = "block";
+                }
+
+                if (data.ethnicity) {
+                    ethnicity.textContent = `Ethnicity: ${data.ethnicity}`;
+                    ethnicity.style.display = "block";
+                }
+
+                if (data.confidence) {
+                    confidence.textContent = `Confidence: ${data.confidence}`;
+                    confidence.style.display = "block";
+                }
+
+                if (data.alternatives) {
+                    alternatives.textContent = `Alternatives: ${data.alternatives}`;
+                    alternatives.style.display = "block";
+                }
+
+                status.textContent = "✅ Audio ready!";
+            } catch (err) {
+                console.error(err);
+                status.textContent = "❌ Failed to generate audio.";
+            }
+        }
+    </script>
+</body>
+</html>
